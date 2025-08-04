@@ -1,0 +1,30 @@
+Ronny Nijimbere helped tremendously with this project. Especially with the
+fetchMeal and fetchRandom meal. He also gave me some advice on how I could move
+forward.
+
+Dropdown menu:
+https://www.youtube.com/watch?v=dmFC1e_CUAQ
+
+Testimonials:
+Thanks to my sister for providing me with a few.
+
+Services provided:
+https://g.co/gemini/share/faf95239b80d
+https://g.co/gemini/share/76de440bf72f
+
+mailto:
+https://www.w3schools.com/tags/tryit.asp?filename=tryhtml_link_mailto
+
+.replace:
+https://stackoverflow.com/questions/441018/replacing-spaces-with-underscores-in-javascript
+
+https://www.youtube.com/watch?v=cuEtnrL9-H0
+
+Glowing button:
+https://pin.it/5LM80hnIQ
+https://www.w3schools.com/css/css3_transitions.asp
+https://developer.mozilla.org/en-US/docs/Web/CSS/transform
+
+button download:
+https://www.w3schools.com/tags//att_a_download.asp
+https://stackoverflow.com/questions/2793751/how-can-i-create-download-link-in-html
