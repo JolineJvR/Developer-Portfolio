@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chop-Shop — Joline.dev</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne+Mono&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#ffffff;
+  --off-white:#f7f9f4;
+  --surface:#eef3e8;
+  --surface-dark:#dde8d0;
+  --border:#c8dbb8;
+  --border-dark:#a8c090;
+  --green-pale:#d4ebca;
+  --green:#5a9e46;
+  --green-dark:#3d7a2e;
+  --green-deep:#2a5a1e;
+  --green-glow:rgba(90,158,70,0.15);
+  --sage:#8ab87a;
+  --herb:#4a7a3a;
+  --muted:#7a9868;
+  --text:#1e3318;
+  --text-light:#3a5530;
+  --text-muted:#6a8860;
+  --orange:#e07830;
+  --orange-pale:#fdf0e4;
+  --red:#c84040;
+  --shadow:rgba(30,51,24,0.1);
+}
+
+html,body{width:100%;min-height:100%;background:var(--off-white);color:var(--text);font-family:'DM Sans',sans-serif}
+
+/* ── NAV ── */
+#topnav{position:sticky;top:0;z-index:200;background:rgba(247,249,244,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:60px}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--green-dark);letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+.nav-logo span{font-size:22px}
+.nav-back{font-family:'Syne Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s}
+.nav-back:hover{color:var(--green-dark)}
+.nav-back::before{content:'←'}
+
+/* ── HERO ── */
+#hero{background:linear-gradient(135deg,var(--green-deep) 0%,var(--herb) 60%,var(--green) 100%);padding:64px 40px 56px;text-align:center;position:relative;overflow:hidden}
+#hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.6' numOctaves='3'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");opacity:.5}
+.hero-tag{font-family:'Syne Mono',monospace;font-size:10px;letter-spacing:.3em;color:rgba(255,255,255,.6);margin-bottom:16px;text-transform:uppercase}
+.hero-title{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(36px,6vw,64px);color:#fff;line-height:1;margin-bottom:14px;letter-spacing:-.03em}
+.hero-title em{font-style:italic;font-weight:300;opacity:.85}
+.hero-sub{font-size:16px;color:rgba(255,255,255,.75);max-width:440px;margin:0 auto;line-height:1.65}
+
+/* ── MAIN LAYOUT ── */
+#main{max-width:1200px;margin:0 auto;padding:48px 32px;display:grid;grid-template-columns:340px 1fr;gap:40px;align-items:start}
+@media(max-width:900px){#main{grid-template-columns:1fr}}
+
+/* ── INGREDIENT PANEL ── */
+#ingredient-panel{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:28px;box-shadow:0 2px 16px var(--shadow);position:sticky;top:76px}
+
+.panel-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.panel-title span{font-size:18px}
+.panel-sub{font-size:13px;color:var(--text-muted);margin-bottom:20px;line-height:1.5}
+
+/* search/type input */
+.ing-input-wrap{position:relative;margin-bottom:16px}
+.ing-input{width:100%;padding:11px 16px 11px 40px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--off-white);outline:none;transition:border-color .2s,box-shadow .2s}
+.ing-input:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-glow)}
+.ing-input-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none}
+#ing-suggestions{position:absolute;top:100%;left:0;right:0;background:var(--white);border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;z-index:50;max-height:180px;overflow-y:auto;display:none;box-shadow:0 8px 24px var(--shadow)}
+.sug-item{padding:10px 16px;font-size:13.5px;color:var(--text-light);cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:10px}
+.sug-item:hover{background:var(--surface)}
+.sug-item .sug-cat{font-family:'Syne Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--muted);margin-left:auto}
+
+/* category quick-picks */
+.cat-section{margin-bottom:18px}
+.cat-label{font-family:'Syne Mono',monospace;font-size:9px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.cat-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.cat-chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:12.5px;color:var(--text-light);cursor:pointer;transition:all .18s;background:var(--off-white);display:flex;align-items:center;gap:5px}
+.chip:hover{border-color:var(--green);color:var(--green-dark);background:var(--green-pale)}
+.chip.selected{background:var(--green);border-color:var(--green);color:#fff}
+.chip-icon{font-size:13px}
+
+/* selected ingredients */
+.selected-section{margin-top:20px;padding-top:18px;border-top:1px solid var(--border)}
+.selected-title{font-family:'Syne Mono',monospace;font-size:9px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+#selected-tags{display:flex;flex-wrap:wrap;gap:6px;min-height:32px}
+.sel-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 10px 5px 12px;background:var(--surface);border:1px solid var(--border-dark);border-radius:20px;font-size:12.5px;color:var(--text-light)}
+.sel-tag button{background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;line-height:1;padding:0;transition:color .15s;display:flex;align-items:center}
+.sel-tag button:hover{color:var(--red)}
+.no-ing{font-size:13px;color:var(--muted);font-style:italic}
+
+.find-btn{width:100%;margin-top:20px;padding:13px;background:var(--green-dark);color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;letter-spacing:.03em;cursor:pointer;transition:background .2s,transform .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.find-btn:hover{background:var(--green-deep);transform:translateY(-1px)}
+.find-btn:active{transform:translateY(0)}
+.find-btn span{font-size:16px}
+
+/* shopping list */
+.shop-toggle{width:100%;margin-top:10px;padding:10px;background:transparent;border:1.5px solid var(--border-dark);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-muted);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.shop-toggle:hover{border-color:var(--orange);color:var(--orange)}
+#shopping-list-wrap{display:none;margin-top:14px;padding:14px;background:var(--orange-pale);border:1px solid rgba(224,120,48,.25);border-radius:8px}
+#shopping-list-wrap.open{display:block}
+.shop-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--orange);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+#shop-items{display:flex;flex-direction:column;gap:6px}
+.shop-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-light)}
+.shop-item input[type=checkbox]{accent-color:var(--orange);width:14px;height:14px;cursor:pointer;flex-shrink:0}
+.shop-item label{cursor:pointer;line-height:1.4}
+.shop-item input:checked+label{text-decoration:line-through;color:var(--muted)}
+.shop-empty{font-size:13px;color:var(--muted);font-style:italic}
+
+/* ── RECIPE GRID ── */
+#recipe-section{min-height:300px}
+.recipe-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.recipe-heading{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:var(--text);letter-spacing:-.02em}
+.recipe-heading em{color:var(--green-dark)}
+.recipe-meta{font-family:'Syne Mono',monospace;font-size:10px;letter-spacing:.15em;color:var(--muted)}
+
+#recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+
+/* recipe card */
+.recipe-card{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .22s,box-shadow .22s;position:relative}
+.recipe-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px var(--shadow)}
+.recipe-card-thumb{height:130px;display:flex;align-items:center;justify-content:center;font-size:52px;position:relative;overflow:hidden}
+.recipe-card-body{padding:18px}
+.recipe-card-name{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:6px;line-height:1.3}
+.recipe-card-desc{font-size:13px;color:var(--text-muted);line-height:1.5;margin-bottom:12px}
+.recipe-card-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.recipe-meta-item{font-family:'Syne Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--muted);display:flex;align-items:center;gap:4px}
+.match-bar{margin-top:10px}
+.match-label{font-family:'Syne Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--muted);margin-bottom:4px;display:flex;justify-content:space-between}
+.match-track{height:3px;background:var(--surface-dark);border-radius:2px;overflow:hidden}
+.match-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--sage),var(--green))}
+.match-badge{position:absolute;top:10px;right:10px;font-family:'Syne Mono',monospace;font-size:9px;letter-spacing:.1em;padding:3px 8px;border-radius:10px;font-weight:600}
+.match-badge.high{background:rgba(90,158,70,.15);color:var(--green-dark);border:1px solid rgba(90,158,70,.3)}
+.match-badge.mid{background:rgba(224,120,48,.12);color:var(--orange);border:1px solid rgba(224,120,48,.25)}
+.match-badge.low{background:var(--surface);color:var(--muted);border:1px solid var(--border)}
+
+/* empty / prompt states */
+#empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-icon{font-size:52px;margin-bottom:16px}
+.empty-title{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;color:var(--text-light);margin-bottom:8px}
+.empty-sub{font-size:14px;line-height:1.6}
+
+/* ── MODAL ── */
+#modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(20,40,14,.5);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s}
+#modal-overlay.open{opacity:1;pointer-events:all}
+#modal{background:var(--white);border-radius:14px;max-width:580px;width:100%;max-height:88vh;overflow-y:auto;transform:translateY(16px);transition:transform .3s cubic-bezier(.77,0,.175,1);box-shadow:0 24px 60px rgba(20,40,14,.25)}
+#modal-overlay.open #modal{transform:translateY(0)}
+.modal-thumb{height:160px;display:flex;align-items:center;justify-content:center;font-size:72px;border-radius:14px 14px 0 0}
+.modal-body{padding:28px 32px 36px}
+.modal-tag{font-family:'Syne Mono',monospace;font-size:10px;letter-spacing:.25em;color:var(--sage);margin-bottom:10px;text-transform:uppercase}
+.modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:28px;color:var(--text);margin-bottom:8px;letter-spacing:-.02em}
+.modal-desc{font-size:14.5px;color:var(--text-muted);line-height:1.7;margin-bottom:22px}
+.modal-section{margin-bottom:20px}
+.modal-section-title{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;letter-spacing:.08em;color:var(--text-light);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.modal-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.ing-list{display:flex;flex-wrap:wrap;gap:7px}
+.ing-item{padding:5px 12px;border-radius:20px;font-size:13px;border:1px solid}
+.ing-item.have{background:rgba(90,158,70,.1);border-color:rgba(90,158,70,.35);color:var(--green-dark)}
+.ing-item.need{background:rgba(224,120,48,.08);border-color:rgba(224,120,48,.3);color:var(--orange)}
+.steps-list{display:flex;flex-direction:column;gap:12px;counter-reset:steps}
+.step{display:flex;gap:14px;align-items:flex-start;counter-increment:steps}
+.step-num{width:26px;height:26px;border-radius:50%;background:var(--green);color:#fff;font-family:'Syne Mono',monospace;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-text{font-size:14px;color:var(--text-light);line-height:1.65}
+.modal-meta-row{display:flex;gap:20px;flex-wrap:wrap;padding:14px;background:var(--surface);border-radius:8px;margin-bottom:20px}
+.modal-meta-item{display:flex;flex-direction:column;gap:3px}
+.modal-meta-val{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--text)}
+.modal-meta-key{font-family:'Syne Mono',monospace;font-size:9px;letter-spacing:.15em;color:var(--muted)}
+.add-to-shop{width:100%;padding:12px;background:var(--orange);color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:background .2s;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:8px}
+.add-to-shop:hover{background:#c86820}
+.modal-close-btn{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;color:var(--muted);transition:color .2s;display:flex;align-items:center;justify-content:center}
+.modal-close-btn:hover{color:var(--text)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.recipe-card{animation:fadeUp .4s ease forwards;opacity:0}
+
+@media(max-width:600px){#main{padding:28px 18px}#topnav{padding:0 20px}.modal-body{padding:20px 20px 28px}}
+</style>
+</head>
+<body>
+
+<nav id="topnav">
+  <div class="nav-logo"><span>🔪</span> Chop-Shop</div>
+  <a href="devstory.html" class="nav-back">portfolio</a>
+</nav>
+
+<div id="hero">
+  <div class="hero-tag">Recipe Generator + Shopping List</div>
+  <h1 class="hero-title">What's in your <em>fridge?</em></h1>
+  <p class="hero-sub">Add your ingredients and we'll find recipes you can make right now — plus build your shopping list for what's missing.</p>
+</div>
+
+<div id="main">
+
+  <!-- ── INGREDIENT PANEL ── -->
+  <aside id="ingredient-panel">
+    <div class="panel-title"><span>🥦</span> Your Ingredients</div>
+    <p class="panel-sub">Type or pick what you have. We'll match it to recipes.</p>
+
+    <div class="ing-input-wrap">
+      <span class="ing-input-icon">🔍</span>
+      <input class="ing-input" id="ing-input" type="text" placeholder="Type an ingredient…" autocomplete="off">
+      <div id="ing-suggestions"></div>
+    </div>
+
+    <div class="cat-section">
+      <div class="cat-label">🥩 Protein</div>
+      <div class="cat-chips" id="chips-protein"></div>
+    </div>
+    <div class="cat-section">
+      <div class="cat-label">🥬 Vegetables</div>
+      <div class="cat-chips" id="chips-veg"></div>
+    </div>
+    <div class="cat-section">
+      <div class="cat-label">🌾 Pantry</div>
+      <div class="cat-chips" id="chips-pantry"></div>
+    </div>
+    <div class="cat-section">
+      <div class="cat-label">🧀 Dairy</div>
+      <div class="cat-chips" id="chips-dairy"></div>
+    </div>
+
+    <div class="selected-section">
+      <div class="selected-title">Selected ingredients</div>
+      <div id="selected-tags"><span class="no-ing">None added yet</span></div>
+    </div>
+
+    <button class="find-btn" id="find-btn"><span>🍳</span> Find Recipes</button>
+    <button class="shop-toggle" id="shop-toggle">🛒 View Shopping List</button>
+    <div id="shopping-list-wrap">
+      <div class="shop-title">🛒 Shopping List</div>
+      <div id="shop-items"><span class="shop-empty">Generate a recipe first to see what you need.</span></div>
+    </div>
+  </aside>
+
+  <!-- ── RECIPE RESULTS ── -->
+  <section id="recipe-section">
+    <div class="recipe-header">
+      <div class="recipe-heading" id="recipe-heading">Start by adding <em>ingredients</em></div>
+      <div class="recipe-meta" id="recipe-meta"></div>
+    </div>
+    <div id="recipe-grid">
+      <div id="empty-state">
+        <div class="empty-icon">🥗</div>
+        <div class="empty-title">Nothing to cook yet</div>
+        <p class="empty-sub">Add at least one ingredient on the left and hit <strong>Find Recipes</strong> to get started.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ── MODAL ── -->
+<div id="modal-overlay">
+  <div id="modal" style="position:relative">
+    <button class="modal-close-btn" id="modal-close">✕</button>
+    <div class="modal-thumb" id="modal-thumb"></div>
+    <div class="modal-body">
+      <div class="modal-tag" id="modal-tag"></div>
+      <div class="modal-title" id="modal-title"></div>
+      <div class="modal-desc" id="modal-desc"></div>
+      <div class="modal-meta-row" id="modal-meta-row"></div>
+      <div class="modal-section">
+        <div class="modal-section-title">Ingredients</div>
+        <div class="ing-list" id="modal-ing-list"></div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Method</div>
+        <div class="steps-list" id="modal-steps"></div>
+      </div>
+      <button class="add-to-shop" id="add-to-shop">🛒 Add missing ingredients to shopping list</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════ DATA ═══════════════════════════ */
+const INGREDIENT_CATS = {
+  protein: [{name:'Chicken',icon:'🍗'},{name:'Beef Mince',icon:'🥩'},{name:'Salmon',icon:'🐟'},{name:'Eggs',icon:'🥚'},{name:'Bacon',icon:'🥓'},{name:'Tuna',icon:'🐠'},{name:'Tofu',icon:'🟨'},{name:'Prawns',icon:'🍤'}],
+  veg:     [{name:'Onion',icon:'🧅'},{name:'Garlic',icon:'🧄'},{name:'Tomato',icon:'🍅'},{name:'Spinach',icon:'🌿'},{name:'Mushrooms',icon:'🍄'},{name:'Broccoli',icon:'🥦'},{name:'Bell Pepper',icon:'🫑'},{name:'Carrot',icon:'🥕'},{name:'Potato',icon:'🥔'},{name:'Zucchini',icon:'🥒'}],
+  pantry:  [{name:'Pasta',icon:'🍝'},{name:'Rice',icon:'🍚'},{name:'Flour',icon:'🌾'},{name:'Olive Oil',icon:'🫙'},{name:'Soy Sauce',icon:'🍶'},{name:'Tinned Tomatoes',icon:'🥫'},{name:'Bread',icon:'🍞'},{name:'Chickpeas',icon:'🫘'},{name:'Lentils',icon:'🌰'},{name:'Coconut Milk',icon:'🥥'}],
+  dairy:   [{name:'Cheese',icon:'🧀'},{name:'Milk',icon:'🥛'},{name:'Butter',icon:'🧈'},{name:'Cream',icon:'🍶'},{name:'Yoghurt',icon:'🥣'}]
+};
+
+const ALL_INGREDIENTS = Object.values(INGREDIENT_CATS).flat();
+
+const RECIPES = [
+  {
+    id:1,name:'Spaghetti Bolognese',emoji:'🍝',bg:'#f0f7e8',
+    desc:'A hearty Italian classic with a rich, slow-cooked meat sauce.',
+    time:'35 min',serves:'4',difficulty:'Easy',
+    ingredients:['Beef Mince','Onion','Garlic','Tinned Tomatoes','Pasta','Olive Oil'],
+    optional:['Carrot','Mushrooms'],
+    steps:['Heat olive oil in a large pan over medium heat.','Fry diced onion and garlic until soft and translucent.','Add beef mince and cook until browned, breaking it up as you go.','Stir in tinned tomatoes, season well, and simmer for 20 minutes.','Cook pasta according to package instructions.','Serve sauce over pasta with parmesan if available.']
+  },
+  {
+    id:2,name:'Chicken Stir Fry',emoji:'🥘',bg:'#e8f5e4',
+    desc:'A quick, colourful stir fry loaded with vegetables and umami flavour.',
+    time:'20 min',serves:'2',difficulty:'Easy',
+    ingredients:['Chicken','Soy Sauce','Garlic','Bell Pepper','Broccoli','Onion'],
+    optional:['Mushrooms','Carrot','Rice'],
+    steps:['Slice chicken into thin strips. Season lightly.','Heat oil in a wok or large frying pan on high.','Stir fry chicken until golden and cooked through. Set aside.','Add vegetables and garlic. Fry 3–4 minutes until tender-crisp.','Return chicken to the pan, pour over soy sauce. Toss well.','Serve immediately over steamed rice.']
+  },
+  {
+    id:3,name:'Shakshuka',emoji:'🍳',bg:'#fdf4e4',
+    desc:'Eggs poached in a spiced tomato and pepper sauce — simple and satisfying.',
+    time:'25 min',serves:'2',difficulty:'Easy',
+    ingredients:['Eggs','Tinned Tomatoes','Bell Pepper','Onion','Garlic','Olive Oil'],
+    optional:['Spinach','Cheese'],
+    steps:['Sauté diced onion and pepper in olive oil until soft.','Add garlic and cook one more minute.','Pour in tinned tomatoes. Season and simmer 10 minutes.','Make wells in the sauce and crack in the eggs.','Cover and cook until whites are set but yolks are still runny.','Serve straight from the pan with crusty bread.']
+  },
+  {
+    id:4,name:'Salmon & Rice Bowl',emoji:'🍱',bg:'#e4f2f8',
+    desc:'Pan-seared salmon over fluffy rice with a simple soy glaze.',
+    time:'25 min',serves:'2',difficulty:'Easy',
+    ingredients:['Salmon','Rice','Soy Sauce','Garlic','Olive Oil'],
+    optional:['Spinach','Zucchini'],
+    steps:['Cook rice according to packet instructions.','Mix soy sauce and minced garlic to make a glaze.','Heat oil in a pan. Place salmon skin-side down. Cook 4 min each side.','Brush glaze over salmon in the last minute of cooking.','Serve over rice with your choice of greens.']
+  },
+  {
+    id:5,name:'Veggie Omelette',emoji:'🥚',bg:'#fdf8e4',
+    desc:'A fluffy, golden omelette filled with whatever vegetables you have on hand.',
+    time:'12 min',serves:'1',difficulty:'Easy',
+    ingredients:['Eggs','Butter','Onion','Mushrooms','Spinach'],
+    optional:['Cheese','Bell Pepper','Tomato'],
+    steps:['Whisk eggs with a pinch of salt.','Sauté onion, mushrooms, and spinach in butter until soft.','Pour eggs into the pan over the vegetables.','Cook on medium-low until edges set. Add cheese if using.','Fold omelette in half and slide onto plate.']
+  },
+  {
+    id:6,name:'Pasta Primavera',emoji:'🌿',bg:'#ecf7e8',
+    desc:'Light, fresh pasta tossed with seasonal vegetables and olive oil.',
+    time:'20 min',serves:'3',difficulty:'Easy',
+    ingredients:['Pasta','Olive Oil','Garlic','Zucchini','Broccoli','Carrot'],
+    optional:['Cheese','Spinach','Bell Pepper'],
+    steps:['Boil pasta until al dente. Reserve a cup of pasta water.','Sauté garlic in olive oil. Add harder vegetables first.','Add softer vegetables and cook 2 more minutes.','Toss in drained pasta with a splash of pasta water.','Finish with parmesan and fresh herbs if available.']
+  },
+  {
+    id:7,name:'Chicken & Potato Bake',emoji:'🍗',bg:'#f5f0e4',
+    desc:'A comforting tray bake — chicken and potatoes roasted until golden.',
+    time:'50 min',serves:'4',difficulty:'Easy',
+    ingredients:['Chicken','Potato','Garlic','Olive Oil','Onion'],
+    optional:['Carrot','Bell Pepper'],
+    steps:['Preheat oven to 200°C.','Chop potatoes and onion into chunks. Toss with olive oil and garlic.','Place chicken pieces on top. Season generously.','Roast 40–45 minutes until chicken is golden and potato is tender.','Rest 5 minutes before serving.']
+  },
+  {
+    id:8,name:'Lentil Soup',emoji:'🍲',bg:'#eef5e0',
+    desc:'A warming, filling soup that practically makes itself.',
+    time:'40 min',serves:'4',difficulty:'Easy',
+    ingredients:['Lentils','Onion','Garlic','Carrot','Tinned Tomatoes','Olive Oil'],
+    optional:['Spinach','Potato'],
+    steps:['Sauté onion, garlic and carrot in olive oil until softened.','Add rinsed lentils and tinned tomatoes. Stir to combine.','Pour in 1 litre of vegetable stock or water. Season well.','Simmer 25–30 minutes until lentils are completely tender.','Stir in spinach if using. Adjust seasoning and serve with bread.']
+  },
+  {
+    id:9,name:'Fried Rice',emoji:'🍚',bg:'#f8f5e0',
+    desc:'The perfect use-it-up dish — works with almost any combination of ingredients.',
+    time:'15 min',serves:'2',difficulty:'Easy',
+    ingredients:['Rice','Eggs','Soy Sauce','Garlic','Onion','Olive Oil'],
+    optional:['Carrot','Peas','Bacon','Chicken'],
+    steps:['Use day-old cooked rice if possible for best results.','Heat oil in a wok. Fry garlic and onion 1 minute.','Add any protein and cook through. Push to side.','Scramble eggs in the pan, then mix everything together.','Add rice and soy sauce. Stir fry 3–4 minutes on high heat.','Season and serve immediately.']
+  },
+  {
+    id:10,name:'Chickpea Curry',emoji:'🍛',bg:'#f5ede0',
+    desc:'A fragrant plant-based curry that is hearty, healthy, and ready in 30 minutes.',
+    time:'30 min',serves:'3',difficulty:'Easy',
+    ingredients:['Chickpeas','Tinned Tomatoes','Coconut Milk','Onion','Garlic','Olive Oil'],
+    optional:['Spinach','Rice'],
+    steps:['Sauté diced onion and garlic in oil until golden.','Add curry powder (1–2 tsp) and stir 1 minute until fragrant.','Add chickpeas, tinned tomatoes, and coconut milk. Stir well.','Simmer 20 minutes until sauce thickens.','Stir in spinach if using. Serve over rice with flatbread.']
+  },
+  {
+    id:11,name:'BLT Sandwich',emoji:'🥪',bg:'#fdf4ec',
+    desc:'A classic — crispy bacon, fresh tomato, and lettuce on toasted bread.',
+    time:'10 min',serves:'1',difficulty:'Easy',
+    ingredients:['Bacon','Bread','Tomato'],
+    optional:['Spinach','Cheese'],
+    steps:['Fry or grill bacon until crispy.','Toast bread to your preference.','Layer bacon, sliced tomato, and lettuce on the bread.','Add cheese if desired. Season and serve.']
+  },
+  {
+    id:12,name:'Prawn Pasta',emoji:'🍤',bg:'#e8f4f8',
+    desc:'Garlic butter prawns tossed through pasta — impressive and fast.',
+    time:'20 min',serves:'2',difficulty:'Easy',
+    ingredients:['Prawns','Pasta','Garlic','Butter','Olive Oil'],
+    optional:['Spinach','Tomato','Cheese'],
+    steps:['Cook pasta in salted boiling water until al dente.','Melt butter with olive oil in a pan. Add minced garlic.','Toss in prawns and cook 2 minutes each side until pink.','Drain pasta, reserving a little water. Add to pan.','Toss everything together. Add spinach or tomato if using.','Serve immediately with parmesan.']
+  }
+];
+
+/* ═══════════════════════════ STATE ═══════════════════════════ */
+let selected = new Set();
+let shoppingList = new Set();
+let activeRecipe = null;
+
+/* ═══════════════════════════ INGREDIENT CHIPS ═══════════════════════════ */
+function buildChips() {
+  Object.entries(INGREDIENT_CATS).forEach(([cat, items]) => {
+    const wrap = document.getElementById(`chips-${cat}`);
+    items.forEach(ing => {
+      const chip = document.createElement('button');
+      chip.className = 'chip';
+      chip.dataset.name = ing.name;
+      chip.innerHTML = `<span class="chip-icon">${ing.icon}</span>${ing.name}`;
+      chip.addEventListener('click', () => toggleIngredient(ing.name, chip));
+      wrap.appendChild(chip);
+    });
+  });
+}
+
+function toggleIngredient(name, chipEl) {
+  if (selected.has(name)) {
+    selected.delete(name);
+    if (chipEl) chipEl.classList.remove('selected');
+  } else {
+    selected.add(name);
+    if (chipEl) chipEl.classList.add('selected');
+  }
+  renderSelectedTags();
+}
+
+function renderSelectedTags() {
+  const wrap = document.getElementById('selected-tags');
+  if (selected.size === 0) {
+    wrap.innerHTML = '<span class="no-ing">None added yet</span>';
+    return;
+  }
+  wrap.innerHTML = '';
+  selected.forEach(name => {
+    const tag = document.createElement('div');
+    tag.className = 'sel-tag';
+    tag.innerHTML = `${name}<button aria-label="remove">×</button>`;
+    tag.querySelector('button').addEventListener('click', () => {
+      selected.delete(name);
+      // uncheck chip if exists
+      document.querySelectorAll('.chip').forEach(c => {
+        if (c.dataset.name === name) c.classList.remove('selected');
+      });
+      renderSelectedTags();
+    });
+    wrap.appendChild(tag);
+  });
+}
+
+/* ═══════════════════════════ SEARCH AUTOCOMPLETE ═══════════════════════════ */
+const ingInput = document.getElementById('ing-input');
+const sugBox = document.getElementById('ing-suggestions');
+
+ingInput.addEventListener('input', () => {
+  const val = ingInput.value.trim().toLowerCase();
+  if (!val) { sugBox.style.display = 'none'; return; }
+  const matches = ALL_INGREDIENTS.filter(i => i.name.toLowerCase().includes(val));
+  if (!matches.length) { sugBox.style.display = 'none'; return; }
+  sugBox.innerHTML = '';
+  matches.slice(0, 8).forEach(i => {
+    const div = document.createElement('div');
+    div.className = 'sug-item';
+    const cat = Object.entries(INGREDIENT_CATS).find(([,v]) => v.some(x => x.name === i.name))?.[0] || '';
+    div.innerHTML = `${i.icon} ${i.name} <span class="sug-cat">${cat}</span>`;
+    div.addEventListener('click', () => {
+      selected.add(i.name);
+      document.querySelectorAll('.chip').forEach(c => { if (c.dataset.name === i.name) c.classList.add('selected'); });
+      renderSelectedTags();
+      ingInput.value = '';
+      sugBox.style.display = 'none';
+    });
+    sugBox.appendChild(div);
+  });
+  sugBox.style.display = 'block';
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.ing-input-wrap')) sugBox.style.display = 'none';
+});
+
+ingInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const val = ingInput.value.trim();
+    if (val) {
+      const match = ALL_INGREDIENTS.find(i => i.name.toLowerCase() === val.toLowerCase());
+      const name = match ? match.name : val;
+      selected.add(name);
+      renderSelectedTags();
+      ingInput.value = '';
+      sugBox.style.display = 'none';
+    }
+  }
+});
+
+/* ═══════════════════════════ RECIPE MATCHING ═══════════════════════════ */
+function scoreRecipe(recipe) {
+  const have = [...selected].map(s => s.toLowerCase());
+  const needed = recipe.ingredients.map(i => i.toLowerCase());
+  const matched = needed.filter(i => have.includes(i));
+  return { matched: matched.length, total: needed.length, pct: matched.length / needed.length };
+}
+
+function findRecipes() {
+  if (selected.size === 0) return;
+  const scored = RECIPES.map(r => ({ ...r, score: scoreRecipe(r) }))
+    .filter(r => r.score.matched > 0)
+    .sort((a, b) => b.score.pct - a.score.pct);
+
+  const grid = document.getElementById('recipe-grid');
+  const heading = document.getElementById('recipe-heading');
+  const meta = document.getElementById('recipe-meta');
+
+  if (!scored.length) {
+    grid.innerHTML = `<div id="empty-state"><div class="empty-icon">🤔</div><div class="empty-title">No matches found</div><p class="empty-sub">Try adding more ingredients — even basics like olive oil or onion open up a lot of recipes.</p></div>`;
+    heading.innerHTML = 'No recipes found';
+    meta.textContent = '';
+    return;
+  }
+
+  heading.innerHTML = `Found <em>${scored.length}</em> recipe${scored.length > 1 ? 's' : ''}`;
+  meta.textContent = `SORTED BY MATCH`;
+  grid.innerHTML = '';
+
+  scored.forEach((r, idx) => {
+    const pct = r.score.pct;
+    const badgeClass = pct >= .8 ? 'high' : pct >= .5 ? 'mid' : 'low';
+    const badgeText = pct >= .8 ? '✦ Great match' : pct >= .5 ? '~ Good match' : '+ Partial';
+    const card = document.createElement('div');
+    card.className = 'recipe-card';
+    card.style.animationDelay = `${idx * 0.07}s`;
+    card.innerHTML = `
+      <div class="recipe-card-thumb" style="background:${r.bg}">${r.emoji}</div>
+      <span class="match-badge ${badgeClass}">${badgeText}</span>
+      <div class="recipe-card-body">
+        <div class="recipe-card-name">${r.name}</div>
+        <div class="recipe-card-desc">${r.desc}</div>
+        <div class="recipe-card-meta">
+          <span class="recipe-meta-item">⏱ ${r.time}</span>
+          <span class="recipe-meta-item">👤 ${r.serves}</span>
+          <span class="recipe-meta-item">📊 ${r.difficulty}</span>
+        </div>
+        <div class="match-bar">
+          <div class="match-label"><span>${r.score.matched}/${r.score.total} ingredients</span><span>${Math.round(pct*100)}%</span></div>
+          <div class="match-track"><div class="match-fill" style="width:${pct*100}%"></div></div>
+        </div>
+      </div>`;
+    card.addEventListener('click', () => openModal(r));
+    grid.appendChild(card);
+  });
+}
+
+document.getElementById('find-btn').addEventListener('click', findRecipes);
+
+/* ═══════════════════════════ MODAL ═══════════════════════════ */
+function openModal(recipe) {
+  activeRecipe = recipe;
+  document.getElementById('modal-thumb').style.background = recipe.bg;
+  document.getElementById('modal-thumb').textContent = recipe.emoji;
+  document.getElementById('modal-tag').textContent = `${recipe.time} · Serves ${recipe.serves} · ${recipe.difficulty}`;
+  document.getElementById('modal-title').textContent = recipe.name;
+  document.getElementById('modal-desc').textContent = recipe.desc;
+
+  const metaRow = document.getElementById('modal-meta-row');
+  const score = scoreRecipe(recipe);
+  metaRow.innerHTML = `
+    <div class="modal-meta-item"><div class="modal-meta-val">${recipe.time}</div><div class="modal-meta-key">COOK TIME</div></div>
+    <div class="modal-meta-item"><div class="modal-meta-val">${recipe.serves}</div><div class="modal-meta-key">SERVINGS</div></div>
+    <div class="modal-meta-item"><div class="modal-meta-val">${score.matched}/${score.total}</div><div class="modal-meta-key">INGREDIENTS</div></div>
+    <div class="modal-meta-item"><div class="modal-meta-val">${recipe.difficulty}</div><div class="modal-meta-key">DIFFICULTY</div></div>`;
+
+  const have = [...selected].map(s => s.toLowerCase());
+  const ingList = document.getElementById('modal-ing-list');
+  ingList.innerHTML = [...recipe.ingredients, ...(recipe.optional||[]).map(o => o+'*')]
+    .map(i => {
+      const clean = i.replace('*','');
+      const isOpt = i.endsWith('*');
+      const cls = have.includes(clean.toLowerCase()) ? 'have' : 'need';
+      return `<span class="ing-item ${cls}">${clean}${isOpt?' (optional)':''}</span>`;
+    }).join('');
+
+  const steps = document.getElementById('modal-steps');
+  steps.innerHTML = recipe.steps.map((s,i) => `<div class="step"><div class="step-num">${i+1}</div><div class="step-text">${s}</div></div>`).join('');
+
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target.id === 'modal-overlay') closeModal(); });
+
+/* ═══════════════════════════ SHOPPING LIST ═══════════════════════════ */
+document.getElementById('add-to-shop').addEventListener('click', () => {
+  if (!activeRecipe) return;
+  const have = [...selected].map(s => s.toLowerCase());
+  const missing = activeRecipe.ingredients.filter(i => !have.includes(i.toLowerCase()));
+  missing.forEach(i => shoppingList.add(i));
+  renderShoppingList();
+  closeModal();
+  document.getElementById('shopping-list-wrap').classList.add('open');
+});
+
+function renderShoppingList() {
+  const wrap = document.getElementById('shop-items');
+  if (!shoppingList.size) {
+    wrap.innerHTML = '<span class="shop-empty">Generate a recipe first to see what you need.</span>';
+    return;
+  }
+  wrap.innerHTML = '';
+  shoppingList.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'shop-item';
+    const id = `shop-${item.replace(/\s/g,'_')}`;
+    row.innerHTML = `<input type="checkbox" id="${id}"><label for="${id}">${item}</label>`;
+    wrap.appendChild(row);
+  });
+}
+
+document.getElementById('shop-toggle').addEventListener('click', () => {
+  document.getElementById('shopping-list-wrap').classList.toggle('open');
+});
+
+/* ═══════════════════════════ INIT ═══════════════════════════ */
+buildChips();
+</script>
+</body>
+</html>

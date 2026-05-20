@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bible Memory — Joline.dev</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne+Mono&family=Syne:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#fdf8f0;
+  --parchment:#f5edda;
+  --parchment-dark:#ecdfc4;
+  --tan:#d4b896;
+  --tan-dark:#b89a78;
+  --brown:#7a5c3a;
+  --brown-dark:#5a3e22;
+  --ink:#2c1f0e;
+  --ink-light:#4a3520;
+  --muted:#9a7c5a;
+  --gold:#c8941a;
+  --gold-light:#e8b840;
+  --gold-dim:rgba(200,148,26,0.15);
+  --red:#c04030;
+  --green:#3a7a4a;
+  --shadow:rgba(44,31,14,0.12);
+}
+
+html,body{width:100%;min-height:100%;background:var(--cream);color:var(--ink);font-family:'Crimson Pro',serif}
+
+/* ── TEXTURE OVERLAY ── */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.4;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='512' height='512' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E");
+  background-size:180px 180px}
+
+/* ── BACK LINK ── */
+#back{position:fixed;top:24px;left:28px;z-index:100;font-family:'Syne Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:8px;transition:color .2s}
+#back:hover{color:var(--brown-dark)}
+#back::before{content:'←';font-size:13px}
+
+/* ── LAYOUT ── */
+#app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:60px 24px 80px}
+
+/* ── HEADER ── */
+header{text-align:center;margin-bottom:48px}
+.header-eyebrow{font-family:'Syne Mono',monospace;font-size:10px;letter-spacing:.35em;color:var(--muted);text-transform:uppercase;margin-bottom:14px}
+.header-title{font-family:'Crimson Pro',serif;font-size:clamp(36px,6vw,58px);font-weight:300;color:var(--brown-dark);line-height:1.1;margin-bottom:10px}
+.header-title em{font-style:italic;color:var(--gold)}
+.header-divider{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--tan-dark),transparent);margin:16px auto}
+.header-sub{font-size:16px;color:var(--muted);max-width:360px;line-height:1.6}
+
+/* ── PROGRESS BAR ── */
+#progress-wrap{width:100%;max-width:640px;margin-bottom:32px}
+.prog-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.prog-label{font-family:'Syne Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--muted)}
+.prog-score{font-family:'Syne Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:.15em}
+.prog-track{width:100%;height:5px;background:var(--parchment-dark);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--tan-dark),var(--gold));border-radius:3px;transition:width .6s cubic-bezier(.77,0,.175,1);width:0%}
+
+/* ── BOOK / CATEGORY SELECTOR ── */
+#category-bar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:36px;max-width:700px}
+.cat-btn{font-family:'Syne Mono',monospace;font-size:10px;letter-spacing:.15em;padding:6px 16px;border:1px solid var(--tan);background:transparent;color:var(--muted);border-radius:20px;cursor:pointer;transition:all .2s}
+.cat-btn:hover{border-color:var(--brown);color:var(--brown)}
+.cat-btn.active{background:var(--brown-dark);border-color:var(--brown-dark);color:var(--cream)}
+
+/* ── CARD ── */
+#card-wrap{width:100%;max-width:640px;perspective:1200px}
+#card{background:var(--parchment);border:1px solid var(--parchment-dark);border-radius:4px;padding:44px 48px;box-shadow:0 4px 24px var(--shadow),0 1px 0 rgba(255,255,255,.8) inset;position:relative;min-height:300px;display:flex;flex-direction:column}
+
+/* decorative corner marks */
+#card::before,#card::after{content:'✦';position:absolute;font-size:12px;color:var(--tan-dark);opacity:.5}
+#card::before{top:16px;left:20px}
+#card::after{top:16px;right:20px}
+
+.card-ref{font-family:'Syne Mono',monospace;font-size:10px;letter-spacing:.25em;color:var(--gold);text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.card-ref::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--parchment-dark),transparent)}
+
+.card-verse{font-size:clamp(18px,2.5vw,22px);font-weight:300;color:var(--ink);line-height:1.75;margin-bottom:28px;font-style:italic;letter-spacing:.01em}
+
+.card-question{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--brown-dark);margin-bottom:24px;letter-spacing:.02em}
+
+/* ── CHOICES ── */
+#choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}
+@media(max-width:480px){#choices{grid-template-columns:1fr}}
+
+.choice{background:var(--cream);border:1.5px solid var(--parchment-dark);border-radius:3px;padding:14px 18px;font-family:'Crimson Pro',serif;font-size:16px;color:var(--ink-light);cursor:pointer;text-align:left;transition:all .22s;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden}
+.choice::before{content:'';position:absolute;inset:0;background:var(--gold-dim);opacity:0;transition:opacity .2s}
+.choice:hover{border-color:var(--tan-dark);color:var(--brown-dark);transform:translateY(-2px);box-shadow:0 4px 16px var(--shadow)}
+.choice:hover::before{opacity:1}
+.choice-letter{font-family:'Syne Mono',monospace;font-size:10px;color:var(--muted);width:18px;flex-shrink:0;letter-spacing:.1em}
+.choice-text{position:relative;z-index:1;line-height:1.4}
+
+.choice.correct{background:rgba(58,122,74,.08);border-color:var(--green);color:var(--green)}
+.choice.correct .choice-letter{color:var(--green)}
+.choice.wrong{background:rgba(192,64,48,.06);border-color:var(--red);color:var(--red)}
+.choice.wrong .choice-letter{color:var(--red)}
+.choice.reveal{background:rgba(58,122,74,.05);border-color:rgba(58,122,74,.4);color:var(--green);opacity:.7}
+.choice.disabled{pointer-events:none}
+
+/* ── FEEDBACK ── */
+#feedback{min-height:48px;margin-bottom:20px;display:flex;align-items:center;gap:12px;font-size:17px;opacity:0;transition:opacity .3s}
+#feedback.show{opacity:1}
+.fb-icon{font-size:22px}
+.fb-text{color:var(--brown-dark);line-height:1.5}
+.fb-text strong{color:var(--green)}
+.fb-text.wrong strong{color:var(--red)}
+
+/* ── NEXT BUTTON ── */
+#next-btn{display:none;align-self:flex-end;font-family:'Syne Mono',monospace;font-size:10px;letter-spacing:.25em;padding:12px 28px;background:var(--brown-dark);color:var(--cream);border:none;cursor:pointer;border-radius:2px;transition:background .2s,transform .15s;margin-top:8px}
+#next-btn:hover{background:var(--brown);transform:translateY(-1px)}
+#next-btn.show{display:block}
+
+/* ── COMPLETION SCREEN ── */
+#complete{display:none;width:100%;max-width:640px;background:var(--parchment);border:1px solid var(--parchment-dark);border-radius:4px;padding:56px 48px;box-shadow:0 4px 24px var(--shadow);text-align:center;flex-direction:column;align-items:center}
+#complete.show{display:flex}
+.complete-icon{font-size:48px;margin-bottom:20px}
+.complete-title{font-family:'Crimson Pro',serif;font-weight:300;font-size:clamp(28px,5vw,42px);color:var(--brown-dark);margin-bottom:10px}
+.complete-title em{font-style:italic;color:var(--gold)}
+.complete-score{font-family:'Syne Mono',monospace;font-size:13px;letter-spacing:.2em;color:var(--muted);margin-bottom:32px}
+.complete-score span{color:var(--gold);font-size:18px}
+.complete-divider{width:50px;height:1px;background:linear-gradient(90deg,transparent,var(--tan-dark),transparent);margin:0 auto 32px}
+.verse-of-day{font-size:17px;font-style:italic;color:var(--ink-light);line-height:1.75;margin-bottom:8px;max-width:440px}
+.verse-ref{font-family:'Syne Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:.2em}
+.restart-btn{margin-top:36px;font-family:'Syne Mono',monospace;font-size:10px;letter-spacing:.25em;padding:13px 32px;background:transparent;border:1.5px solid var(--brown-dark);color:var(--brown-dark);cursor:pointer;border-radius:2px;transition:all .2s}
+.restart-btn:hover{background:var(--brown-dark);color:var(--cream)}
+
+/* ── STREAK BADGE ── */
+#streak{position:fixed;top:24px;right:28px;z-index:100;font-family:'Syne Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--muted);display:flex;align-items:center;gap:7px}
+.streak-fire{font-size:16px;animation:flicker 1.5s ease infinite}
+@keyframes flicker{0%,100%{transform:scale(1) rotate(-3deg)}50%{transform:scale(1.1) rotate(3deg)}}
+
+/* ── ENTRANCE ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeUp .5s ease forwards}
+.fade-in-d1{animation:fadeUp .5s ease .1s forwards;opacity:0}
+.fade-in-d2{animation:fadeUp .5s ease .2s forwards;opacity:0}
+.fade-in-d3{animation:fadeUp .5s ease .3s forwards;opacity:0}
+</style>
+</head>
+<body>
+
+<a href="devstory.html" id="back">portfolio</a>
+<div id="streak"><span class="streak-fire">🔥</span><span id="streak-count">0</span> streak</div>
+
+<div id="app">
+  <header class="fade-in">
+    <div class="header-eyebrow">Bible Memory</div>
+    <h1 class="header-title">Hide it in your <em>heart.</em></h1>
+    <div class="header-divider"></div>
+    <p class="header-sub">Test your knowledge of scripture — one verse at a time.</p>
+  </header>
+
+  <div id="progress-wrap" class="fade-in-d1">
+    <div class="prog-meta">
+      <span class="prog-label">PROGRESS</span>
+      <span class="prog-score" id="score-label">0 / 0 correct</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+  </div>
+
+  <div id="category-bar" class="fade-in-d2">
+    <button class="cat-btn active" data-cat="all">All Books</button>
+    <button class="cat-btn" data-cat="psalms">Psalms</button>
+    <button class="cat-btn" data-cat="proverbs">Proverbs</button>
+    <button class="cat-btn" data-cat="gospels">Gospels</button>
+    <button class="cat-btn" data-cat="epistles">Epistles</button>
+    <button class="cat-btn" data-cat="ot">Old Testament</button>
+  </div>
+
+  <div id="card-wrap" class="fade-in-d3">
+    <div id="card">
+      <div class="card-ref" id="card-ref">—</div>
+      <p class="card-verse" id="card-verse"></p>
+      <p class="card-question">Which reference belongs to this verse?</p>
+      <div id="choices"></div>
+      <div id="feedback"><span class="fb-icon" id="fb-icon"></span><span class="fb-text" id="fb-text"></span></div>
+      <button id="next-btn">Next verse →</button>
+    </div>
+
+    <div id="complete">
+      <div class="complete-icon">✦</div>
+      <h2 class="complete-title">Well <em>done.</em></h2>
+      <div class="complete-score">You scored <span id="final-score">0</span> out of <span id="final-total">0</span></div>
+      <div class="complete-divider"></div>
+      <p class="verse-of-day" id="complete-verse"></p>
+      <p class="verse-ref" id="complete-ref"></p>
+      <button class="restart-btn" id="restart-btn">Try again →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const VERSES = [
+  // PSALMS
+  {ref:"Psalm 23:1",text:"The Lord is my shepherd; I shall not want.",cat:"psalms"},
+  {ref:"Psalm 46:1",text:"God is our refuge and strength, a very present help in trouble.",cat:"psalms"},
+  {ref:"Psalm 119:105",text:"Your word is a lamp to my feet and a light to my path.",cat:"psalms"},
+  {ref:"Psalm 91:1",text:"He who dwells in the shelter of the Most High will abide in the shadow of the Almighty.",cat:"psalms"},
+  {ref:"Psalm 27:1",text:"The Lord is my light and my salvation; whom shall I fear?",cat:"psalms"},
+  {ref:"Psalm 34:8",text:"Oh, taste and see that the Lord is good! Blessed is the man who takes refuge in him!",cat:"psalms"},
+  {ref:"Psalm 37:4",text:"Delight yourself in the Lord, and he will give you the desires of your heart.",cat:"psalms"},
+
+  // PROVERBS
+  {ref:"Proverbs 3:5",text:"Trust in the Lord with all your heart, and do not lean on your own understanding.",cat:"proverbs"},
+  {ref:"Proverbs 3:6",text:"In all your ways acknowledge him, and he will make straight your paths.",cat:"proverbs"},
+  {ref:"Proverbs 16:3",text:"Commit your work to the Lord, and your plans will be established.",cat:"proverbs"},
+  {ref:"Proverbs 31:25",text:"Strength and dignity are her clothing, and she laughs at the time to come.",cat:"proverbs"},
+  {ref:"Proverbs 4:23",text:"Keep your heart with all vigilance, for from it flow the springs of life.",cat:"proverbs"},
+
+  // GOSPELS
+  {ref:"John 3:16",text:"For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.",cat:"gospels"},
+  {ref:"John 14:6",text:"Jesus said to him, I am the way, and the truth, and the life. No one comes to the Father except through me.",cat:"gospels"},
+  {ref:"Matthew 5:16",text:"Let your light shine before others, so that they may see your good works and give glory to your Father who is in heaven.",cat:"gospels"},
+  {ref:"Matthew 6:33",text:"But seek first the kingdom of God and his righteousness, and all these things will be added to you.",cat:"gospels"},
+  {ref:"John 11:35",text:"Jesus wept.",cat:"gospels"},
+  {ref:"Luke 1:37",text:"For nothing will be impossible with God.",cat:"gospels"},
+  {ref:"John 8:32",text:"And you will know the truth, and the truth will set you free.",cat:"gospels"},
+
+  // EPISTLES
+  {ref:"Romans 8:28",text:"And we know that for those who love God all things work together for good, for those who are called according to his purpose.",cat:"epistles"},
+  {ref:"Philippians 4:13",text:"I can do all things through him who strengthens me.",cat:"epistles"},
+  {ref:"Philippians 4:7",text:"And the peace of God, which surpasses all understanding, will guard your hearts and your minds in Christ Jesus.",cat:"epistles"},
+  {ref:"2 Timothy 3:16",text:"All Scripture is breathed out by God and profitable for teaching, for reproof, for correction, and for training in righteousness.",cat:"epistles"},
+  {ref:"Galatians 2:20",text:"I have been crucified with Christ. It is no longer I who live, but Christ who lives in me.",cat:"epistles"},
+  {ref:"Ephesians 2:8",text:"For by grace you have been saved through faith. And this is not your own doing; it is the gift of God.",cat:"epistles"},
+  {ref:"Romans 12:2",text:"Do not be conformed to this world, but be transformed by the renewal of your mind.",cat:"epistles"},
+
+  // OLD TESTAMENT
+  {ref:"Joshua 1:9",text:"Be strong and courageous. Do not be frightened, and do not be dismayed, for the Lord your God is with you wherever you go.",cat:"ot"},
+  {ref:"Isaiah 40:31",text:"But they who wait for the Lord shall renew their strength; they shall mount up with wings like eagles.",cat:"ot"},
+  {ref:"Jeremiah 29:11",text:"For I know the plans I have for you, declares the Lord, plans for welfare and not for evil, to give you a future and a hope.",cat:"ot"},
+  {ref:"Isaiah 41:10",text:"Fear not, for I am with you; be not dismayed, for I am your God; I will strengthen you, I will help you.",cat:"ot"},
+  {ref:"Genesis 1:1",text:"In the beginning, God created the heavens and the earth.",cat:"ot"},
+  {ref:"Micah 6:8",text:"He has told you, O man, what is good; and what does the Lord require of you but to do justice, and to love kindness, and to walk humbly with your God?",cat:"ot"},
+];
+
+const LETTERS = ['A','B','C','D'];
+let currentCat = 'all';
+let pool = [];
+let qIndex = 0;
+let correct = 0;
+let answered = false;
+let streak = 0;
+const QUIZ_LENGTH = 10;
+
+function getPool(cat) {
+  return cat === 'all' ? [...VERSES] : VERSES.filter(v => v.cat === cat);
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildQuiz() {
+  const source = getPool(currentCat);
+  pool = shuffle(source).slice(0, Math.min(QUIZ_LENGTH, source.length));
+  qIndex = 0; correct = 0; answered = false;
+  updateScore();
+  showQuestion();
+  document.getElementById('card').style.display = 'flex';
+  document.getElementById('complete').classList.remove('show');
+}
+
+function showQuestion() {
+  answered = false;
+  const q = pool[qIndex];
+  document.getElementById('card-ref').textContent = `${qIndex + 1} of ${pool.length}`;
+  document.getElementById('card-verse').textContent = `"${q.text}"`;
+
+  // build wrong answers from same category first, then others
+  const others = VERSES.filter(v => v.ref !== q.ref);
+  const wrongs = shuffle(others).slice(0, 3);
+  const choices = shuffle([q, ...wrongs]);
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  choices.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice';
+    btn.dataset.ref = c.ref;
+    btn.dataset.correct = (c.ref === q.ref).toString();
+    btn.innerHTML = `<span class="choice-letter">${LETTERS[i]}</span><span class="choice-text">${c.ref}</span>`;
+    btn.addEventListener('click', () => handleAnswer(btn, q.ref));
+    choicesEl.appendChild(btn);
+  });
+
+  // reset feedback
+  const fb = document.getElementById('feedback');
+  fb.classList.remove('show');
+  document.getElementById('fb-icon').textContent = '';
+  document.getElementById('fb-text').textContent = '';
+
+  const nb = document.getElementById('next-btn');
+  nb.classList.remove('show');
+  nb.textContent = qIndex === pool.length - 1 ? 'See results →' : 'Next verse →';
+
+  // progress
+  document.getElementById('prog-fill').style.width = `${(qIndex / pool.length) * 100}%`;
+}
+
+function handleAnswer(btn, correctRef) {
+  if (answered) return;
+  answered = true;
+  const isCorrect = btn.dataset.correct === 'true';
+
+  // style all choices
+  document.querySelectorAll('.choice').forEach(b => {
+    b.classList.add('disabled');
+    if (b.dataset.correct === 'true') b.classList.add(isCorrect ? 'correct' : 'reveal');
+    else if (b === btn && !isCorrect) b.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('feedback');
+  const fbIcon = document.getElementById('fb-icon');
+  const fbText = document.getElementById('fb-text');
+
+  if (isCorrect) {
+    correct++;
+    streak++;
+    document.getElementById('streak-count').textContent = streak;
+    fbIcon.textContent = '✦';
+    fbText.innerHTML = `<strong>Correct!</strong> "${correctRef}" — well remembered.`;
+    fbText.className = 'fb-text';
+  } else {
+    streak = 0;
+    document.getElementById('streak-count').textContent = streak;
+    fbIcon.textContent = '✗';
+    fbText.innerHTML = `Not quite. The verse is <strong>${correctRef}</strong>.`;
+    fbText.className = 'fb-text wrong';
+  }
+
+  fb.classList.add('show');
+  updateScore();
+  document.getElementById('next-btn').classList.add('show');
+}
+
+function nextQuestion() {
+  qIndex++;
+  if (qIndex >= pool.length) {
+    showComplete();
+  } else {
+    showQuestion();
+  }
+}
+
+function showComplete() {
+  document.getElementById('card').style.display = 'none';
+  const comp = document.getElementById('complete');
+  comp.classList.add('show');
+  document.getElementById('final-score').textContent = correct;
+  document.getElementById('final-total').textContent = pool.length;
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('score-label').textContent = `${correct} / ${pool.length} correct`;
+
+  // random verse as closing thought
+  const rand = VERSES[Math.floor(Math.random() * VERSES.length)];
+  document.getElementById('complete-verse').textContent = `"${rand.text}"`;
+  document.getElementById('complete-ref').textContent = `— ${rand.ref}`;
+}
+
+function updateScore() {
+  document.getElementById('score-label').textContent = `${correct} / ${pool.length} correct`;
+}
+
+// Category buttons
+document.querySelectorAll('.cat-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentCat = btn.dataset.cat;
+    buildQuiz();
+  });
+});
+
+document.getElementById('next-btn').addEventListener('click', nextQuestion);
+document.getElementById('restart-btn').addEventListener('click', buildQuiz);
+
+// Boot
+buildQuiz();
+</script>
+</body>
+</html>
