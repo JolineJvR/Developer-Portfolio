@@ -341,7 +341,7 @@ body.hovering #cur-ring{width:56px;height:56px;border-color:rgba(255,192,64,.8)}
       <div class="contact-heading r">Let's build<br><em>something.</em></div>
       <div class="contact-sub r">I'm open to freelance, contract, and full-time opportunities. Got a problem worth solving? Let's talk.</div>
       <div class="contact-links r">
-        <a class="c-link" href="https://mail.google.com/mail/?view=cm&to=jvrenjoline357@gmail.com" target="_blank"><span class="c-icon">EMAIL</span><span class="c-label">jvrenjoline357@gmail.com</span><span class="c-arrow">→</span></a>
+        <a class="c-link" href="mailto:jvrenjoline357@gmail.com"><span class="c-icon">EMAIL</span><span class="c-label">jvrenjoline357@gmail.com</span><span class="c-arrow">→</span></a>
         <a class="c-link" href="https://linkedin.com/in/joline-janse-van-rensburg-29b808325" target="_blank"><span class="c-icon">LINKEDIN</span><span class="c-label">/in/joline-janse-van-rensburg-29b808325</span><span class="c-arrow">→</span></a>
         <a class="c-link" href="https://github.com/JolineJvR" target="_blank"><span class="c-icon">GITHUB</span><span class="c-label">/JolineJvR</span><span class="c-arrow">→</span></a>
         <a class="c-link" href="tel:+27634797919"><span class="c-icon">PHONE</span><span class="c-label">+27 63 479 7919</span><span class="c-arrow">→</span></a>
@@ -369,7 +369,7 @@ body.hovering #cur-ring{width:56px;height:56px;border-color:rgba(255,192,64,.8)}
 const PROJECTS={
   bible:{tag:'01 — Bible Memory',title:'Bible Memory',desc:'An interactive web app designed to make memorising Bible verses engaging and effective. Features multiple quiz modes, progress tracking, and a clean interface that keeps you coming back.',stack:['Python','Flask','SQLite','JavaScript','HTML','CSS'],siteUrl:'bible-memory.html',githubUrl:'#'},
   chopshop:{tag:'02 — Chop-Shop',title:'Chop-Shop',desc:"A smart kitchen companion that generates personalised recipes based on ingredients you already have, and builds your shopping list for what you're missing. No more staring at a full fridge wondering what to cook.",stack:['React.js','Python','Flask','MongoDB','Bootstrap'],siteUrl:'chop-shop.html',githubUrl:'#'},
-  spectraflow:{tag:'03 — SpectraFlow',title:'SpectraFlow',desc:'A media discovery platform powered by third-party APIs. Browse trending movies, music, podcasts, and more from a single unified interface. Built to explore the full spectrum of entertainment.',stack:['Flask','Python','TMDB API','Last.fm API','JavaScript','CSS'],siteUrl:'http://localhost:5000',githubUrl:'#'},
+  spectraflow:{tag:'03 — SpectraFlow',title:'SpectraFlow',desc:'A media discovery platform powered by third-party APIs. Browse trending movies, music, podcasts, and more from a single unified interface. Built to explore the full spectrum of entertainment.',stack:['Flask','Python','TMDB API','Last.fm API','JavaScript','CSS'],siteUrl:'https://spectraflow.onrender.com',githubUrl:'#'},
   impulsebuy:{tag:'04 — Impulse-Buy',title:'Impulse-Buy',desc:'A full-featured e-commerce application with product listings, search, cart management, and a complete checkout flow. Built with a focus on clean UX and a responsive shopping experience.',stack:['HTML','CSS','JavaScript','Flask','Python'],siteUrl:'impulse-buy.html',githubUrl:'#'}
 };
 
@@ -488,6 +488,19 @@ logo.addEventListener('mouseenter',()=>{let count=0;glitchTimer=setInterval(()=>
 logo.addEventListener('mouseleave',()=>{clearInterval(glitchTimer);logo.textContent=origText});
 
 pbar.style.width=`${(1/TOTAL)*100}%`;
+
+function copyEmail(){
+  navigator.clipboard.writeText("jvrenjoline357@gmail.com").then(()=>{
+    const label=document.getElementById("email-label");
+    const arrow=document.getElementById("email-arrow");
+    label.textContent="Copied to clipboard!";
+    arrow.textContent="✓";
+    setTimeout(()=>{
+      label.textContent="jvrenjoline357@gmail.com";
+      arrow.textContent="→";
+    },2500);
+  });
+}
 </script>
 </body>
 </html>
